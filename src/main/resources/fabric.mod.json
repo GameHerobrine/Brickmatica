@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "brickmatica",
+  "version": "1.0.0",
+
+  "name": "Brickmatica",
+  "description": "Port of backported lunatrius' schematica from ModLoader to Babric",
+  "authors": [
+    "GameHerobrine"
+  ],
+  "contact": {
+    "homepage": "https://freehij.gib.enchantile.uwu/",
+    "sources": "https://github.com/GameHerobrine/Brickmatica"
+  },
+
+  "license": "WTFPL",
+  "icon": "assets/brickmatica/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.skidcode.gh.brickmatica.Brickmatica"
+    ]
+  },
+  "mixins": [
+    "brickmatica.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "minecraft": "1.0.0-beta.7.3"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

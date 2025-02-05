@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.skidcode.gh.brickmatica.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "EntityRendererMixin",
+    "RenderEngineAccessor",
+    "WorldAccessor",
+    "MinecraftMixin",
+    "GameSettingsMixin",
+    "PlayerControllerMixin",
+    "PlayerControllerSPMixin",
+    "PlayerControllerMPMixin",
+    "WorldMixin"
+    
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
