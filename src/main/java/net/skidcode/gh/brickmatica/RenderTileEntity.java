@@ -1,22 +1,17 @@
 package net.skidcode.gh.brickmatica;
 
 import net.minecraft.src.Block;
-import net.minecraft.src.BlockChest;
 import net.minecraft.src.FontRenderer;
 import net.minecraft.src.RenderEngine;
 import net.minecraft.src.SignModel;
 import net.minecraft.src.TileEntity;
-import net.minecraft.src.TileEntityChest;
 import net.minecraft.src.TileEntityRenderer;
 import net.minecraft.src.TileEntitySign;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 public class RenderTileEntity {
 	private final Settings settings = Settings.instance();
-	//private final ModelChest chestModel = new ModelChest();
-	//private final ModelChest largeChestModel = new ModelLargeChest();
 	private final SignModel modelSign = new SignModel();
 	private final SchematicWorld world;
 
@@ -57,7 +52,7 @@ public class RenderTileEntity {
 			this.modelSign.signStick.showModel = false;
 		}
 
-		this.bindTextureByName("/item/sign.png");
+		this.bindSignTexture();
 		GL11.glPushMatrix();
 		GL11.glScalef(var10, -var10, -var10);
 		this.modelSign.func_887_a();
@@ -89,88 +84,11 @@ public class RenderTileEntity {
 		return this.world.getBlockMetadata(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
 	}
 
-	private void unifyAdjacentChests(BlockChest par1BlockChest, SchematicWorld par2World, int par3, int par4, int par5) {
-		int var5 = par2World.getBlockId(par3, par4, par5 - 1);
-		int var6 = par2World.getBlockId(par3, par4, par5 + 1);
-		int var7 = par2World.getBlockId(par3 - 1, par4, par5);
-		int var8 = par2World.getBlockId(par3 + 1, par4, par5);
-		int var10;
-		int var11;
-		byte metadata;
-		int var14;
-
-		if (var5 != par1BlockChest.blockID && var6 != par1BlockChest.blockID) {
-			if (var7 != par1BlockChest.blockID && var8 != par1BlockChest.blockID) {
-				metadata = 3;
-
-				if (Block.opaqueCubeLookup[var5] && !Block.opaqueCubeLookup[var6]) {
-					metadata = 3;
-				}
-
-				if (Block.opaqueCubeLookup[var6] && !Block.opaqueCubeLookup[var5]) {
-					metadata = 2;
-				}
-
-				if (Block.opaqueCubeLookup[var7] && !Block.opaqueCubeLookup[var8]) {
-					metadata = 5;
-				}
-
-				if (Block.opaqueCubeLookup[var8] && !Block.opaqueCubeLookup[var7]) {
-					metadata = 4;
-				}
-			} else {
-				var10 = par2World.getBlockId(var7 == par1BlockChest.blockID ? par3 - 1 : par3 + 1, par4, par5 - 1);
-				var11 = par2World.getBlockId(var7 == par1BlockChest.blockID ? par3 - 1 : par3 + 1, par4, par5 + 1);
-				metadata = 3;
-				if (var7 == par1BlockChest.blockID) {
-					var14 = par2World.getBlockMetadata(par3 - 1, par4, par5);
-				} else {
-					var14 = par2World.getBlockMetadata(par3 + 1, par4, par5);
-				}
-
-				if (var14 == 2) {
-					metadata = 2;
-				}
-
-				if ((Block.opaqueCubeLookup[var5] || Block.opaqueCubeLookup[var10]) && !Block.opaqueCubeLookup[var6] && !Block.opaqueCubeLookup[var11]) {
-					metadata = 3;
-				}
-
-				if ((Block.opaqueCubeLookup[var6] || Block.opaqueCubeLookup[var11]) && !Block.opaqueCubeLookup[var5] && !Block.opaqueCubeLookup[var10]) {
-					metadata = 2;
-				}
-			}
-		} else {
-			var10 = par2World.getBlockId(par3 - 1, par4, var5 == par1BlockChest.blockID ? par5 - 1 : par5 + 1);
-			var11 = par2World.getBlockId(par3 + 1, par4, var5 == par1BlockChest.blockID ? par5 - 1 : par5 + 1);
-			metadata = 5;
-			if (var5 == par1BlockChest.blockID) {
-				var14 = par2World.getBlockMetadata(par3, par4, par5 - 1);
-			} else {
-				var14 = par2World.getBlockMetadata(par3, par4, par5 + 1);
-			}
-
-			if (var14 == 4) {
-				metadata = 4;
-			}
-
-			if ((Block.opaqueCubeLookup[var7] || Block.opaqueCubeLookup[var10]) && !Block.opaqueCubeLookup[var8] && !Block.opaqueCubeLookup[var11]) {
-				metadata = 5;
-			}
-
-			if ((Block.opaqueCubeLookup[var8] || Block.opaqueCubeLookup[var11]) && !Block.opaqueCubeLookup[var7] && !Block.opaqueCubeLookup[var10]) {
-				metadata = 4;
-			}
-
-			par2World.setBlockMetadata(par3, par4, par5, metadata);
-		}
-	}
-
-	private void bindTextureByName(String string) {
+	private void bindSignTexture() {
 		RenderEngine var2 = TileEntityRenderer.instance.renderEngine;
 
 		if (var2 != null) {
-			var2.bindTexture(var2.getTexture(string));
+			var2.bindTexture(var2.getTexture("/item/sign.png"));
 		}
 	}
 }

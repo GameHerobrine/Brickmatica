@@ -3,38 +3,19 @@ package net.skidcode.gh.brickmatica;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
 
-import javax.imageio.ImageIO;
-
-import net.minecraft.client.Minecraft;
 import net.minecraft.src.Block;
 import net.minecraft.src.EntityPlayerSP;
-import net.minecraft.src.EntityRenderer;
-import net.minecraft.src.GLAllocation;
 import net.minecraft.src.IBlockAccess;
 import net.minecraft.src.RenderBlocks;
-import net.minecraft.src.RenderEngine;
 import net.minecraft.src.Tessellator;
 import net.minecraft.src.TileEntity;
-import net.minecraft.src.TileEntityChest;
 import net.minecraft.src.TileEntityRenderer;
 import net.minecraft.src.TileEntitySign;
 import net.minecraft.src.TileEntitySpecialRenderer;
-import net.minecraft.src.Timer;
-import net.skidcode.gh.brickmatica.mixin.RenderEngineAccessor;
-import net.skidcode.gh.brickmatica.util.Utils;
 import net.skidcode.gh.brickmatica.util.Vector3f;
 import net.skidcode.gh.brickmatica.util.Vector3i;
 import net.skidcode.gh.brickmatica.util.Vector4i;
@@ -44,10 +25,7 @@ import org.lwjgl.opengl.GL11;
 
 public class Render {
 	public final Settings settings = Settings.instance();
-	public final List<String> textures = new ArrayList<String>();
 	public final BufferedImage missingTextureImage = new BufferedImage(64, 64, 2);
-	//public Field fieldTextureMap = null;
-	//public Field fieldSingleIntBuffer = null;
 
 	public final int glBlockList = GL11.glGenLists(1);
 
@@ -65,7 +43,6 @@ public class Render {
 
 	public Render() {
 		initTexture();
-		initReflection();
 	}
 
 	public void initTexture() {
@@ -77,22 +54,7 @@ public class Render {
 		graphics.dispose();
 	}
 
-	public void initReflection() {
-		/*try {
-			Field[] flds = RenderEngine.class.getDeclaredFields();
-			this.fieldTextureMap = flds[1];
-			this.fieldTextureMap.setAccessible(true);
-			this.fieldSingleIntBuffer =flds[4];
-			this.fieldSingleIntBuffer.setAccessible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-			this.fieldTextureMap = null;
-			this.fieldSingleIntBuffer = null;
-			this.settings.enableAlpha = false;
-		}*/
-	}
-
-	public void onRender(EntityRenderer event, float f) {
+	public void onRender(float f) {
 		if (this.settings.minecraft != null) {
 			EntityPlayerSP player = this.settings.minecraft.thePlayer;
 			if (player != null) {
@@ -217,17 +179,16 @@ public class Render {
 		IBlockAccess mcWorld = this.settings.minecraft.theWorld;
 		SchematicWorld world = this.settings.schematic;
 		RenderBlocks renderBlocks = this.settings.renderBlocks;
-		List<Vector4i> invalidBlockId = new ArrayList<Vector4i>();
-		List<Vector4i> invalidBlockMetadata = new ArrayList<Vector4i>();
-		List<Vector4i> todoBlocks = new ArrayList<Vector4i>();
+		List<Vector4i> invalidBlockId = new ArrayList<>();
+		List<Vector4i> invalidBlockMetadata = new ArrayList<>();
+		List<Vector4i> todoBlocks = new ArrayList<>();
 
 		int x, y, z;
-		int blockId = 0, mcBlockId = 0;
-		int sides = 0;
-		Block block = null;
-		String lastTexture = "";
+		int blockId, mcBlockId;
+		int sides;
+		Block block;
 
-		boolean ambientOcclusion = this.settings.minecraft.gameSettings.ambientOcclusion;
+        boolean ambientOcclusion = this.settings.minecraft.gameSettings.ambientOcclusion;
 		this.settings.minecraft.gameSettings.ambientOcclusion = false;
 
 		Tessellator.instance.startDrawingQuads();
@@ -275,22 +236,17 @@ public class Render {
 									invalidBlockMetadata.add(new Vector4i(x, y, z, sides));
 								}
 							}
-						} else if (mcBlockId == 0 && blockId > 0 && blockId < 0x1000) {
+						} else if (blockId > 0 && blockId < 0x1000) {
 							if (this.settings.highlight) {
 								todoBlocks.add(new Vector4i(x, y, z, sides));
 							}
 
 							if (block != null) {
-								/*if (lastTexture != block.getTextureFile()) {
-									ForgeHooksClient.bindTexture(getTextureName(block.getTextureFile()), 0);
-									lastTexture = block.getTextureFile();
-								} TODO forge support*/
-								//mod_Schematica.instance.mc.theWorld.setBlockAndMetadata(x + this.settings.offset.x, y + this.settings.offset.y, z + this.settings.offset.z, block.blockID, mcWorld.getBlockMetadata(x + this.settings.offset.x, y + this.settings.offset.y, z + this.settings.offset.z));
 								renderBlocks.renderBlockByRenderType(block, x, y, z);
 							}
 						}
 					} catch (Exception e) {
-						e.printStackTrace();
+						Brickmatica.LOGGER.error("Error occurred while rendering blocks", e);
 					}
 				}
 			}
@@ -304,24 +260,24 @@ public class Render {
 
 		Vector3i tmp;
 		for (Vector4i invalidBlock : invalidBlockId) {
-			tmp = new Vector3i(invalidBlock.x, invalidBlock.y, invalidBlock.z);
+			tmp = new Vector3i(invalidBlock.x(), invalidBlock.y(), invalidBlock.z());
 
-			drawCuboidQuad(tmp, tmp.clone().add(1), invalidBlock.w, 1.0f, 0.0f, 0.0f, 0.25f);
-			drawCuboidLine(tmp, tmp.clone().add(1), invalidBlock.w, 1.0f, 0.0f, 0.0f, 0.25f);
+			drawCuboidQuad(tmp, tmp.clone().add(1), invalidBlock.w(), 1.0f, 0.0f, 0.0f, 0.25f);
+			drawCuboidLine(tmp, tmp.clone().add(1), invalidBlock.w(), 1.0f, 0.0f, 0.0f, 0.25f);
 		}
 
 		for (Vector4i invalidBlock : invalidBlockMetadata) {
-			tmp = new Vector3i(invalidBlock.x, invalidBlock.y, invalidBlock.z);
+			tmp = new Vector3i(invalidBlock.x(), invalidBlock.y(), invalidBlock.z());
 
-			drawCuboidQuad(tmp, tmp.clone().add(1), invalidBlock.w, 0.75f, 0.35f, 0.0f, 0.45f);
-			drawCuboidLine(tmp, tmp.clone().add(1), invalidBlock.w, 0.75f, 0.35f, 0.0f, 0.45f);
+			drawCuboidQuad(tmp, tmp.clone().add(1), invalidBlock.w(), 0.75f, 0.35f, 0.0f, 0.45f);
+			drawCuboidLine(tmp, tmp.clone().add(1), invalidBlock.w(), 0.75f, 0.35f, 0.0f, 0.45f);
 		}
 
 		for (Vector4i todoBlock : todoBlocks) {
-			tmp = new Vector3i(todoBlock.x, todoBlock.y, todoBlock.z);
+			tmp = new Vector3i(todoBlock.x(), todoBlock.y(), todoBlock.z());
 
-			drawCuboidQuad(tmp, tmp.clone().add(1), todoBlock.w, 0.0f, 0.75f, 1.0f, 0.25f);
-			drawCuboidLine(tmp, tmp.clone().add(1), todoBlock.w, 0.0f, 0.75f, 1.0f, 0.25f);
+			drawCuboidQuad(tmp, tmp.clone().add(1), todoBlock.w(), 0.0f, 0.75f, 1.0f, 0.25f);
+			drawCuboidLine(tmp, tmp.clone().add(1), todoBlock.w(), 0.0f, 0.75f, 1.0f, 0.25f);
 		}
 	}
 
@@ -331,7 +287,7 @@ public class Render {
 		RenderTileEntity renderTileEntity = this.settings.renderTileEntity;
 
 		int x, y, z;
-		int mcBlockId = 0;
+		int mcBlockId;
 
 		GL11.glColor4f(1.0f, 1.0f, 1.0f, this.settings.alpha);
 
@@ -364,13 +320,13 @@ public class Render {
 				}
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Brickmatica.LOGGER.error("Error occurred while rendering tile entities", ex);
 		}
 	}
 
 	public void renderGuide() {
-		Vector3i start = null;
-		Vector3i end = null;
+		Vector3i start;
+		Vector3i end;
 
 		start = this.settings.pointMin.clone().sub(this.settings.offset);
 		end = this.settings.pointMax.clone().sub(this.settings.offset).add(1);
@@ -578,85 +534,4 @@ public class Render {
 		this.objectCountLine += total;
 	}
 
-	public String getTextureName(String texture) {
-		if (!this.settings.enableAlpha) {
-			return texture;
-		}
-
-		String textureName = "/" + (int) (this.settings.alpha * 255) + texture.replace('/', '-');
-
-		if (this.textures.contains(textureName)) {
-			return textureName;
-		}
-
-		/*try {
-			ITexturePack texturePackBase = this.settings.minecraft.texturePackList.getSelectedTexturePack();
-			File newTextureFile = new File(Settings.textureDirectory, texturePackBase.getTexturePackFileName().replace(".zip", "") + textureName);
-			if (!newTextureFile.exists()) {
-				BufferedImage bufferedImage = readTextureImage(texturePackBase.getResourceAsStream(texture));
-				if (bufferedImage == null) {
-					return texture;
-				}
-
-				int x, y, color;
-				for (x = 0; x < bufferedImage.getWidth(); x++) {
-					for (y = 0; y < bufferedImage.getHeight(); y++) {
-						color = bufferedImage.getRGB(x, y);
-						bufferedImage.setRGB(x, y, (((int) (((color >> 24) & 0xFF) * this.settings.alpha)) << 24) | (color & 0x00FFFFFF));
-					}
-				}
-
-				newTextureFile.getParentFile().mkdirs();
-				ImageIO.write(bufferedImage, "png", newTextureFile);
-			}
-
-			loadTexture(textureName, readTextureImage(new BufferedInputStream(new FileInputStream(newTextureFile))));
-
-			this.textures.add(textureName);
-			return textureName;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}*/
-
-		return texture;
-	}
-
-	public int loadTexture(String texture, BufferedImage textureImage) throws IllegalArgumentException, IllegalAccessException {
-		
-		HashMap<String, Integer> textureMap = (HashMap<String, Integer>) ((RenderEngineAccessor)this.settings.minecraft.renderEngine).textureMap();
-		
-		IntBuffer singleIntBuffer = (IntBuffer) ((RenderEngineAccessor)this.settings.minecraft.renderEngine).singleIntBuffer();
-
-		Integer textureId = textureMap.get(texture);
-
-		if (textureId != null) {
-			return textureId.intValue();
-		}
-
-		try {
-			singleIntBuffer.clear();
-			GLAllocation.generateTextureNames(singleIntBuffer);
-			int glTextureId = singleIntBuffer.get(0);
-			this.settings.minecraft.renderEngine.setupTexture(textureImage, glTextureId);
-			textureMap.put(texture, Integer.valueOf(glTextureId));
-			return glTextureId;
-		} catch (Exception e) {
-			e.printStackTrace();
-			GLAllocation.generateTextureNames(singleIntBuffer);
-			int glTextureId = singleIntBuffer.get(0);
-			this.settings.minecraft.renderEngine.setupTexture(this.missingTextureImage, glTextureId);
-			textureMap.put(texture, Integer.valueOf(glTextureId));
-			return glTextureId;
-		}
-	}
-
-	public BufferedImage readTextureImage(InputStream inputStream) throws IOException {
-		BufferedImage bufferedImage = ImageIO.read(inputStream);
-		inputStream.close();
-		return bufferedImage;
-	}
 }

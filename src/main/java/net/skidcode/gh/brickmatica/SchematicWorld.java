@@ -3,24 +3,16 @@ package net.skidcode.gh.brickmatica;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.src.BiomeGenBase;
 import net.minecraft.src.Block;
-import net.minecraft.src.Entity;
 import net.minecraft.src.IChunkProvider;
-import net.minecraft.src.ISaveHandler;
 import net.minecraft.src.Material;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
-import net.minecraft.src.SaveHandlerMP;
 import net.minecraft.src.TileEntity;
-import net.minecraft.src.TileEntityChest;
 import net.minecraft.src.World;
 import net.skidcode.gh.brickmatica.util.Utils;
 
 public class SchematicWorld extends World {
-	//public final static WorldSettings worldSettings = new WorldSettings(0, EnumGameType.CREATIVE, false, false, WorldType.FLAT);
-
 	public final Settings settings = Settings.instance();
 	public int[][][] blocks;
 	public int[][][] metadata;
@@ -30,7 +22,6 @@ public class SchematicWorld extends World {
 	public short height;
 
 	public SchematicWorld() {
-		
 		super(Utils.mc().theWorld, Utils.mc().theWorld.worldProvider);
 		this.blocks = null;
 		this.metadata = null;
@@ -50,16 +41,13 @@ public class SchematicWorld extends World {
 		this.height = height;
 	}
 
-	
-	
-	@SuppressWarnings("null")
 	public void readFromNBT(NBTTagCompound tagCompound) {
-		byte localBlocks[] = tagCompound.getByteArray("Blocks");
-		byte localMetadata[] = tagCompound.getByteArray("Data");
+		byte[] localBlocks = tagCompound.getByteArray("Blocks");
+		byte[] localMetadata = tagCompound.getByteArray("Data");
 
-		boolean extra = false;
-		byte extraBlocks[] = null;
-		if ((extra = tagCompound.hasKey("Add")) == true) {
+		boolean extra = tagCompound.hasKey("Add");
+		byte[] extraBlocks = null;
+		if (extra) {
 			extraBlocks = tagCompound.getByteArray("Add");
 		}
 
@@ -83,7 +71,7 @@ public class SchematicWorld extends World {
 			}
 		}
 
-		this.tileEntities = new ArrayList<TileEntity>();
+		this.tileEntities = new ArrayList<>();
 
 		NBTTagList tileEntitiesList = tagCompound.getTagList("TileEntities");
 
@@ -94,8 +82,6 @@ public class SchematicWorld extends World {
 				this.tileEntities.add(tileEntity);
 			}
 		}
-
-		refreshChests();
 	}
 
 	public void writeToNBT(NBTTagCompound tagCompound) {
@@ -103,9 +89,9 @@ public class SchematicWorld extends World {
 		tagCompound.setShort("Length", this.length);
 		tagCompound.setShort("Height", this.height);
 
-		byte localBlocks[] = new byte[this.width * this.length * this.height];
-		byte localMetadata[] = new byte[this.width * this.length * this.height];
-		byte extraBlocks[] = new byte[this.width * this.length * this.height];
+		byte[] localBlocks = new byte[this.width * this.length * this.height];
+		byte[] localMetadata = new byte[this.width * this.length * this.height];
+		byte[] extraBlocks = new byte[this.width * this.length * this.height];
 		boolean extra = false;
 
 		for (int x = 0; x < this.width; x++) {
@@ -148,18 +134,15 @@ public class SchematicWorld extends World {
 
 	@Override
 	public TileEntity getBlockTileEntity(int x, int y, int z) {
-		for (int i = 0; i < this.tileEntities.size(); i++) {
-			if (this.tileEntities.get(i).xCoord == x && this.tileEntities.get(i).yCoord == y && this.tileEntities.get(i).zCoord == z) {
-				return this.tileEntities.get(i);
-			}
-		}
+        for (TileEntity tileEntity : this.tileEntities)
+        {
+            if (tileEntity.xCoord == x && tileEntity.yCoord == y && tileEntity.zCoord == z)
+            {
+                return tileEntity;
+            }
+        }
 		return null;
 	}
-
-	/*@Override
-	public int getLightBrightnessForSkyBlocks(int var1, int var2, int var3, int var4) {
-		return 15;
-	}*/
 
 	@Override
 	public float getBrightness(int var1, int var2, int var3, int var4) {
@@ -205,49 +188,17 @@ public class SchematicWorld extends World {
 		return this.blocks[x][y][z] == 0;
 	}
 
-	/*@Override
-	public boolean extendedLevelsInChunkCache() {
-		return false;
-	}
-
-	@Override
-	public boolean doesBlockHaveSolidTopSurface(int var1, int var2, int var3) {
-		return false;
-	}*/
-
-	@Override
+    @Override
 	protected IChunkProvider getChunkProvider() {
 		return null;
-	}
-
-	/*@Override
-	public Entity getEntityByID(int var1) {
-		return null;
-	}*/
-
-	public void setBlockMetadata(int x, int y, int z, byte metadata) {
-		this.metadata[x][y][z] = metadata;
 	}
 
 	public Block getBlock(int x, int y, int z) {
 		return Block.blocksList[getBlockId(x, y, z)];
 	}
 
-	public void setTileEntities(List<TileEntity> tileEntities) {
-		this.tileEntities = tileEntities;
-	}
-
 	public List<TileEntity> getTileEntities() {
 		return this.tileEntities;
-	}
-
-	public void refreshChests() {
-		TileEntity tileEntity;
-		
-	}
-
-	public void checkForAdjacentChests(TileEntityChest tileEntityChest) {
-		
 	}
 
 	public void flip() {
@@ -269,8 +220,6 @@ public class SchematicWorld extends World {
 				}
 			}
 		}
-
-		refreshChests();
 	}
 
 	public int flipMetadataZ(int blockMetadata, int blockId) {
@@ -381,14 +330,14 @@ public class SchematicWorld extends World {
 			case 0x0:
 				return (byte) (0x2 | (blockMetadata & 0xC));
 			case 0x2:
-				return (byte) (0x0 | (blockMetadata & 0xC));
+				return (byte) (blockMetadata & 0xC);
 			}
 		} else if (blockId == Block.redstoneRepeaterActive.blockID || blockId == Block.redstoneRepeaterIdle.blockID) {
 			switch (blockMetadata & 0x3) {
 			case 0x0:
 				return (byte) (0x2 | (blockMetadata & 0xC));
 			case 0x2:
-				return (byte) (0x0 | (blockMetadata & 0xC));
+				return (byte) (blockMetadata & 0xC);
 			}
 		} else if (blockId == Block.trapdoor.blockID) {
 			switch (blockMetadata) {
@@ -425,11 +374,7 @@ public class SchematicWorld extends World {
 		this.blocks = localBlocks;
 		this.metadata = localMetadata;
 
-		TileEntity tileEntity;
-		int coord;
-		refreshChests();
-
-		short tmp = this.width;
+        short tmp = this.width;
 		this.width = this.length;
 		this.length = tmp;
 	}
@@ -474,7 +419,7 @@ public class SchematicWorld extends World {
 			case 0x0:
 				return (byte) (0x1 | (blockMetadata & 0x8));
 			case 0x1:
-				return (byte) (0x0 | (blockMetadata & 0x8));
+				return (byte) (blockMetadata & 0x8);
 			case 0x2:
 				return (byte) (0x4 | (blockMetadata & 0x8));
 			case 0x3:
@@ -491,7 +436,7 @@ public class SchematicWorld extends World {
 			case 0x1:
 				return (byte) (0x2 | (blockMetadata & 0x4));
 			case 0x2:
-				return (byte) (0x0 | (blockMetadata & 0x4));
+				return (byte) (blockMetadata & 0x4);
 			case 0x3:
 				return (byte) (0x1 | (blockMetadata & 0x4));
 			}
@@ -518,7 +463,7 @@ public class SchematicWorld extends World {
 			case 0x0:
 				return (byte) (0x3 | (blockMetadata & 0xC));
 			case 0x1:
-				return (byte) (0x0 | (blockMetadata & 0xC));
+				return (byte) (blockMetadata & 0xC);
 			case 0x2:
 				return (byte) (0x1 | (blockMetadata & 0xC));
 			case 0x3:
@@ -526,16 +471,6 @@ public class SchematicWorld extends World {
 			}
 		}else if (blockId == Block.signPost.blockID) {
 			return (byte) ((blockMetadata + 0xC) % 0x10);
-			/*
-			 * switch (blockMetadata) { case 0x0: return 0xC; case 0x1: return
-			 * 0xD; case 0x2: return 0xE; case 0x3: return 0xF; case 0x4: return
-			 * 0x0; case 0x5:
-			 * return 0x1; case 0x6: return 0x2; case 0x7: return 0x3; case 0x8:
-			 * return 0x4; case 0x9: return 0x5; case 0xA: return 0x6; case 0xB:
-			 * return 0x7;
-			 * case 0xC: return 0x8; case 0xD: return 0x9; case 0xE: return 0xA;
-			 * case 0xF: return 0xB; }
-			 */
 		} else if (blockId == Block.ladder.blockID || blockId == Block.signWall.blockID || blockId == Block.stoneOvenActive.blockID || blockId == Block.stoneOvenIdle.blockID || blockId == Block.dispenser.blockID || blockId == Block.chest.blockID) {
 			switch (blockMetadata) {
 			case 0x2:
@@ -563,7 +498,7 @@ public class SchematicWorld extends World {
 			case 0x0:
 				return (byte) (0x3 | (blockMetadata & 0xC));
 			case 0x1:
-				return (byte) (0x0 | (blockMetadata & 0xC));
+				return (byte) ((blockMetadata & 0xC));
 			case 0x2:
 				return (byte) (0x1 | (blockMetadata & 0xC));
 			case 0x3:
@@ -574,7 +509,7 @@ public class SchematicWorld extends World {
 			case 0x0:
 				return (byte) (0x3 | (blockMetadata & 0xC));
 			case 0x1:
-				return (byte) (0x0 | (blockMetadata & 0xC));
+				return (byte) ((blockMetadata & 0xC));
 			case 0x2:
 				return (byte) (0x1 | (blockMetadata & 0xC));
 			case 0x3:
@@ -594,7 +529,7 @@ public class SchematicWorld extends World {
 		} else if (blockId == Block.pistonBase.blockID || blockId == Block.pistonStickyBase.blockID || blockId == Block.pistonExtension.blockID) {
 			switch (blockMetadata & 0x7) {
 			case 0x0:
-				return (byte) (0x0 | (blockMetadata & 0x8));
+				return (byte) ((blockMetadata & 0x8));
 			case 0x1:
 				return (byte) (0x1 | (blockMetadata & 0x8));
 			case 0x2:

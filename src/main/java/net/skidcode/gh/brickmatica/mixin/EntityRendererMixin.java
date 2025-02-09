@@ -12,7 +12,7 @@ import net.skidcode.gh.brickmatica.Brickmatica;
 public class EntityRendererMixin{
 	@Inject(method = "renderRainSnow", at = @At("HEAD"))
 	public void renderRainSnow(float f, CallbackInfo inf) {
-		Brickmatica.render.onRender((EntityRenderer)(Object)this, f);
+		Brickmatica.render.onRender(f);
 	}
 	
 	@Inject(method = "updateCameraAndRender", at = @At("TAIL"))

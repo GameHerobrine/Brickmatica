@@ -1,13 +1,13 @@
 package net.skidcode.gh.brickmatica.util;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.Minecraft;
 import net.skidcode.gh.brickmatica.Settings;
 
 public class Utils {
-	public static Minecraft mc;
+	private static final Minecraft mc = (Minecraft) FabricLoaderImpl.INSTANCE.getGameInstance();
+
 	public static Minecraft mc() {
-		if(mc == null) mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
 		return mc;
 	}
 	

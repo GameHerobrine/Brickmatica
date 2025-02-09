@@ -3,8 +3,6 @@ package net.skidcode.gh.brickmatica.util;
 public class Vector3f {
 	public float x, y, z;
 
-	public final static Vector3f ZERO = new Vector3f();
-
 	public Vector3f() {
 		this.x = 0;
 		this.y = 0;
@@ -15,10 +13,6 @@ public class Vector3f {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-	}
-
-	public Vector3f add(Vector3f vec) {
-		return add(vec.x, vec.y, vec.z);
 	}
 
 	public Vector3f add(float i) {
@@ -33,10 +27,6 @@ public class Vector3f {
 		return this;
 	}
 
-	public Vector3f sub(Vector3i vec) {
-		return sub(vec.x, vec.y, vec.z);
-	}
-
 	public Vector3f sub(float i) {
 		return sub(i, i, i);
 	}
@@ -49,7 +39,8 @@ public class Vector3f {
 		return this;
 	}
 
-	@Override
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
 	public Vector3f clone() {
 		return new Vector3f(this.x, this.y, this.z);
 	}
@@ -60,12 +51,11 @@ public class Vector3f {
 			return true;
 		}
 
-		if (!(obj instanceof Vector3f)) {
+		if (!(obj instanceof Vector3f o)) {
 			return false;
 		}
 
-		Vector3f o = (Vector3f) obj;
-		return this.x == o.x && this.y == o.y && this.z == o.z;
+        return this.x == o.x && this.y == o.y && this.z == o.z;
 	}
 
 	@Override

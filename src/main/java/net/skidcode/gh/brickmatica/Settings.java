@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.ChunkCache;
@@ -16,7 +15,6 @@ import net.minecraft.src.KeyBinding;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.RenderBlocks;
 import net.minecraft.src.RenderManager;
-import net.minecraft.src.StringTranslate;
 import net.minecraft.src.TileEntity;
 import net.skidcode.gh.brickmatica.util.Utils;
 import net.skidcode.gh.brickmatica.util.Vector3f;
@@ -27,15 +25,13 @@ import org.lwjgl.input.Keyboard;
 
 public class Settings {
 	private final static Settings instance = new Settings();
-	
-	// loaded from config
-	public boolean enableAlpha = false;
+
 	public float alpha = 1.0f;
 	public boolean highlight = true;
 	public float blockDelta = 0.005f;
-	public Vector3i renderRange = new Vector3i(20, 15, 20);
+	public final Vector3i renderRange = new Vector3i(20, 15, 20);
 
-	public KeyBinding[] keyBindings = new KeyBinding[] {
+	public final KeyBinding[] keyBindings = new KeyBinding[] {
 			new KeyBinding("Load schematic", Keyboard.KEY_DIVIDE),
 			new KeyBinding("Save schematic", Keyboard.KEY_MULTIPLY),
 			new KeyBinding("Manipulate schematic", Keyboard.KEY_SUBTRACT)
@@ -43,24 +39,24 @@ public class Settings {
 
 	public static final File schematicDirectory = new File(Minecraft.getMinecraftDir(), "/schematics/");
 	public static final File textureDirectory = new File(Minecraft.getMinecraftDir(), "/resources/mod/schematica/");
-	public Minecraft minecraft = Utils.mc();
+	public final Minecraft minecraft = Utils.mc();
 	public ChunkCache mcWorldCache = null;
 	public SchematicWorld schematic = null;
-	public Vector3f playerPosition = new Vector3f();
+	public final Vector3f playerPosition = new Vector3f();
 	public RenderBlocks renderBlocks = null;
 	public RenderTileEntity renderTileEntity = null;
 	public int selectedSchematic = 0;
-	public Vector3i pointA = new Vector3i();
-	public Vector3i pointB = new Vector3i();
-	public Vector3i pointMin = new Vector3i();
-	public Vector3i pointMax = new Vector3i();
+	public final Vector3i pointA = new Vector3i();
+	public final Vector3i pointB = new Vector3i();
+	public final Vector3i pointMin = new Vector3i();
+	public final Vector3i pointMax = new Vector3i();
 	public int rotationRender = 0;
-	public Vector3i offset = new Vector3i();
+	public final Vector3i offset = new Vector3i();
 	public boolean needsUpdate = true;
 	public boolean isRenderingSchematic = false;
 	public int renderingLayer = -1;
 	public boolean isRenderingGuide = false;
-	public int[] increments = {
+	public final int[] increments = {
 			1, 5, 15, 50, 250
 	};
 
@@ -85,28 +81,20 @@ public class Settings {
 	public void keyboardEvent(int key) {
 		
 		switch (key) {
-		case 0:
-			this.minecraft.displayGuiScreen(new GuiSchematicLoad(this.minecraft.currentScreen));
-			break;
-
-		case 1:
-			this.minecraft.displayGuiScreen(new GuiSchematicSave(this.minecraft.currentScreen));
-			break;
-
-		case 2:
-			this.minecraft.displayGuiScreen(new GuiSchematicControl(this.minecraft.currentScreen));
-			break;
+			case 0 -> this.minecraft.displayGuiScreen(new GuiSchematicLoad(this.minecraft.currentScreen));
+			case 1 -> this.minecraft.displayGuiScreen(new GuiSchematicSave());
+			case 2 -> this.minecraft.displayGuiScreen(new GuiSchematicControl());
 		}
 	}
 
 	public List<String> getSchematicFiles() {
-		ArrayList<String> schematicFiles = new ArrayList<String>();
+		ArrayList<String> schematicFiles = new ArrayList<>();
 		schematicFiles.add("-- No schematic --");
 
 		File[] files = schematicDirectory.listFiles(new FileFilterSchematic());
-		for (int i = 0; i < files.length; i++) {
-			schematicFiles.add(files[i].getName());
-		}
+		if (files == null) return List.of();
+        for (File file : files)
+            schematicFiles.add(file.getName());
 		return schematicFiles;
 	}
 
@@ -125,7 +113,7 @@ public class Settings {
 				this.isRenderingSchematic = true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Brickmatica.LOGGER.error("Error occurred while loading schematic", e);
 			this.schematic = null;
 			this.renderBlocks = null;
 			this.renderTileEntity = null;
@@ -152,7 +140,7 @@ public class Settings {
 
 			int[][][] blocks = new int[width][height][length];
 			int[][][] metadata = new int[width][height][length];
-			List<TileEntity> tileEntities = new ArrayList<TileEntity>();
+			List<TileEntity> tileEntities = new ArrayList<>();
 
 			for (int x = minX; x <= maxX; x++) {
 				for (int y = minY; y <= maxY; y++) {
@@ -178,10 +166,9 @@ public class Settings {
 			OutputStream stream = new FileOutputStream(filename);
 			CompressedStreamTools.writeGzippedCompoundToOutputStream(tagCompound, stream);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Brickmatica.LOGGER.error("Error occurred while saving schematic", e);
 			return false;
 		}
-		System.out.println("gother4");
 		return true;
 	}
 
