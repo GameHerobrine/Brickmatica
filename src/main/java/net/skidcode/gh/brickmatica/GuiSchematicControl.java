@@ -2,15 +2,11 @@ package net.skidcode.gh.brickmatica;
 
 import net.minecraft.src.GuiButton;
 import net.minecraft.src.GuiScreen;
-import net.minecraft.src.MathHelper;
-import net.minecraft.src.StringTranslate;
 
 public class GuiSchematicControl extends GuiScreen {
 	private final Settings settings = Settings.instance();
-	@SuppressWarnings("unused")
-	private final GuiScreen prevGuiScreen;
 
-	private int centerX = 0;
+    private int centerX = 0;
 	private int centerY = 0;
 
 	private GuiButton btnDecX = null;
@@ -37,10 +33,7 @@ public class GuiSchematicControl extends GuiScreen {
 	private int incrementY = 0;
 	private int incrementZ = 0;
 
-	public GuiSchematicControl(GuiScreen guiScreen) {
-		this.prevGuiScreen = guiScreen;
-	}
-
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.centerX = this.width / 2;
@@ -92,25 +85,15 @@ public class GuiSchematicControl extends GuiScreen {
 		this.btnFlip = new GuiButton(id++, this.width - 90, this.height - 55, 80, 20, "Flip");
 		this.controlList.add(this.btnFlip);
 
-		this.btnRotate = new GuiButton(id++, this.width - 90, this.height - 30, 80, 20, "Rotate");
+		this.btnRotate = new GuiButton(id, this.width - 90, this.height - 30, 80, 20, "Rotate");
 		this.controlList.add(this.btnRotate);
 	}
+
 	public static int clamp_int(int par0, int par1, int par2)
     {
-        if (par0 < par1)
-        {
-            return par1;
-        }
-
-        if (par0 > par2)
-        {
-            return par2;
-        }
-        else
-        {
-            return par0;
-        }
+        return Math.min(Math.max(par0, par1), par2);
     }
+
 	@Override
 	protected void actionPerformed(GuiButton guiButton) {
 		if (guiButton.enabled) {

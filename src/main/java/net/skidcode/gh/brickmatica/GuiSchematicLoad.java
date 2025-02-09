@@ -1,19 +1,18 @@
 package net.skidcode.gh.brickmatica;
 
+import java.awt.*;
 import java.io.File;
-import java.net.URI;
 import java.util.List;
 
 import net.minecraft.src.GuiButton;
 import net.minecraft.src.GuiScreen;
 import net.minecraft.src.GuiSmallButton;
-import net.minecraft.src.StringTranslate;
 
 import org.lwjgl.Sys;
 
 public class GuiSchematicLoad extends GuiScreen {
 	private final Settings settings = Settings.instance();
-	protected GuiScreen prevGuiScreen;
+	private final GuiScreen prevGuiScreen;
 	private GuiSchematicLoadSlot schematicGuiChooserSlot;
 	private GuiSmallButton btnOpenDir = null;
 	private GuiSmallButton btnDone = null;
@@ -22,6 +21,7 @@ public class GuiSchematicLoad extends GuiScreen {
 		this.prevGuiScreen = guiScreen;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		int id = 0;
@@ -29,7 +29,7 @@ public class GuiSchematicLoad extends GuiScreen {
 		this.btnOpenDir = new GuiSmallButton(id++, this.width / 2 - 154, this.height - 48, "Open schematic folder");
 		this.controlList.add(this.btnOpenDir);
 
-		this.btnDone = new GuiSmallButton(id++, this.width / 2 + 4, this.height - 48, "Done");
+		this.btnDone = new GuiSmallButton(id, this.width / 2 + 4, this.height - 48, "Done");
 		this.controlList.add(this.btnDone);
 
 		this.schematicGuiChooserSlot = new GuiSchematicLoadSlot(this);
@@ -43,20 +43,14 @@ public class GuiSchematicLoad extends GuiScreen {
 				boolean success = false;
 
 				try {
-					Class c = Class.forName("java.awt.Desktop");
-					Object m = c.getMethod("getDesktop", new Class[0]).invoke((Object) null, new Object[0]);
-					c.getMethod("browse", new Class[] {
-						URI.class
-					}).invoke(m, new Object[] {
-						Settings.schematicDirectory.toURI()
-					});
+					Desktop.getDesktop().browse(Settings.schematicDirectory.toURI());
 				} catch (Throwable e) {
-					e.printStackTrace();
+					Brickmatica.LOGGER.error("Error occurred while trying to open directory", e);
 					success = true;
 				}
 
 				if (success) {
-					System.out.println("Opening via Sys class!");
+					Brickmatica.LOGGER.info("Opening via Sys class!");
 					Sys.openURL("file://" + Settings.schematicDirectory.getAbsolutePath());
 				}
 			} else if (guiButton.id == this.btnDone.id) {

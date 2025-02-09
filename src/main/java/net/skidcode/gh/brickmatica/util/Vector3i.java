@@ -17,10 +17,6 @@ public class Vector3i {
 		this.z = z;
 	}
 
-	public Vector3i add(Vector3i vec) {
-		return add(vec.x, vec.y, vec.z);
-	}
-
 	public Vector3i add(int i) {
 		return add(i, i, i);
 	}
@@ -37,10 +33,6 @@ public class Vector3i {
 		return sub(vec.x, vec.y, vec.z);
 	}
 
-	public Vector3i sub(int i) {
-		return sub(i, i, i);
-	}
-
 	@SuppressWarnings("hiding")
 	public Vector3i sub(int x, int y, int z) {
 		this.x -= x;
@@ -49,7 +41,8 @@ public class Vector3i {
 		return this;
 	}
 
-	@Override
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
 	public Vector3i clone() {
 		return new Vector3i(this.x, this.y, this.z);
 	}
@@ -60,12 +53,11 @@ public class Vector3i {
 			return true;
 		}
 
-		if (!(obj instanceof Vector3i)) {
+		if (!(obj instanceof Vector3i o)) {
 			return false;
 		}
 
-		Vector3i o = (Vector3i) obj;
-		return this.x == o.x && this.y == o.y && this.z == o.z;
+        return this.x == o.x && this.y == o.y && this.z == o.z;
 	}
 
 	@Override
