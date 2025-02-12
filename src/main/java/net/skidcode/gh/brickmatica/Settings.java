@@ -97,7 +97,15 @@ public class Settings {
             schematicFiles.add(file.getName());
 		return schematicFiles;
 	}
-
+	
+	public void unloadSchematic() {
+		this.schematic = null;
+		this.renderBlocks = null;
+		this.renderTileEntity = null;
+		this.isRenderingSchematic = false;
+		this.needsUpdate = true;
+	}
+	
 	public boolean loadSchematic(String filename) {
 		try {
 			InputStream stream = new FileInputStream(filename);
@@ -114,10 +122,7 @@ public class Settings {
 			}
 		} catch (Exception e) {
 			Brickmatica.LOGGER.error("Error occurred while loading schematic", e);
-			this.schematic = null;
-			this.renderBlocks = null;
-			this.renderTileEntity = null;
-			this.isRenderingSchematic = false;
+			this.unloadSchematic();
 			return false;
 		}
 
@@ -255,6 +260,7 @@ public class Settings {
 	}
 
 	public void reloadChunkCache() {
+		if(this.schematic == null) return;
 		this.mcWorldCache = new ChunkCache(this.minecraft.theWorld, this.offset.x - 1, this.offset.y - 1, this.offset.z - 1, this.offset.x + this.schematic.width() + 1, this.offset.y + this.schematic.height() + 1, this.offset.z + this.schematic.length() + 1);
 		this.needsUpdate = true;
 	}

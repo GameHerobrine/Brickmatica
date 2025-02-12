@@ -92,6 +92,10 @@ public class GuiSchematicLoad extends GuiScreen {
 		} catch (Exception e) {
 			this.settings.selectedSchematic = 0;
 		}
+		
+		if(this.settings.selectedSchematic == 0) {
+			this.settings.unloadSchematic();
+		}
 		this.settings.moveHere();
 	}
 }
